@@ -2,55 +2,62 @@
 
 import { useState, useEffect } from "react";
 
+// Created a functional component called CountDownClock
 const CountDownClock = () => {
-  const [currentDrawIndex, setCurrentDrawIndex] = useState(0);
+  // Initialized state to hold countdown values (hours, minutes, seconds)
   const [countdownValues, setCountdownValues] = useState({
     hours: 0,
     minutes: 0,
     seconds: 0,
   });
+
+  let currentDrawIndex = 0; // Keep track of the current draw index
+
+  // Array of draw times
   const drawTimes = [
-    new Date().setHours(23, 44, 0),
-    new Date().setHours(23, 45, 0),
-    new Date().setHours(23, 46, 0),
+    new Date().setHours(10, 0, 0),
+    new Date().setHours(14, 0, 0),
+    new Date().setHours(20, 0, 0),
   ];
 
+  // Function to update countdown values based on draw times
   function countDown() {
-    console.log(currentDrawIndex);
-
     const currentTime = new Date().getTime();
-    const timeLeft = drawTimes[currentDrawIndex] - currentTime;
-
-    console.log(timeLeft);
+    const timeLeft = drawTimes[currentDrawIndex] - currentTime; // Calculate time left until next draw
 
     if (timeLeft <= 0) {
-      // Move to the next draw time if the current time has passed
-      setCurrentDrawIndex((prevIndex) => (prevIndex + 1) % drawTimes.length);
-    } else {
-      const hours = Math.floor(
-        (timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-      );
-      const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-
-      // Update the countdown values state
-      setCountdownValues({
-        hours,
-        minutes,
-        seconds,
-      });
+      currentDrawIndex = currentDrawIndex + 1; // Move to the next draw time index if time left is less than 0
+      currentDrawIndex > 2 ? (currentDrawIndex = 0) : null; // Set index to 0 if it's more than 2 because we only have 3 indexes in array
     }
-  }
-  // Set up the countdown interval
-  useEffect(() => {
-    const countdownInterval = setInterval(countDown, 1000);
 
-    // Clear the interval when the component is unmounted
+    const updatedTimeLeft = drawTimes[currentDrawIndex] - currentTime; // Calculate time left again
+
+    // Calculate hours, minutes, and seconds from the updated time left
+    const hours = Math.floor(
+      (updatedTimeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+    );
+    const minutes = Math.floor(
+      (updatedTimeLeft % (1000 * 60 * 60)) / (1000 * 60)
+    );
+    const seconds = Math.floor((updatedTimeLeft % (1000 * 60)) / 1000);
+
+    // Update the countdownValues state with the calculated values
+    setCountdownValues({
+      hours,
+      minutes,
+      seconds,
+    });
+  }
+
+  // Set up an effect to run the countDown function every second
+  useEffect(() => {
+    const countdownInterval = setInterval(countDown, 1000); // Run countDown every 1000ms (1 second)
     return () => {
-      clearInterval(countdownInterval);
+      clearInterval(countdownInterval); // Clean up interval when component unmounts
     };
   }, []);
 
+  // Render the countdown timer component
   return (
     <div className="flex flex-col text-gray-900">
       <h3>Time till next draw</h3>
